@@ -11,7 +11,7 @@ namespace game::engine {
     class TickEvent: public IEvent<Tick>
     {
     public:
-        void emit() const;
+        std::size_t emit() const;
     private:
         mutable Tick tick;
     };

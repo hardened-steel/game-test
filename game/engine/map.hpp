@@ -1,44 +1,48 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <tuple>
 #include "object.hpp"
 #include "event.hpp"
 
 namespace game::engine {
 
-    class Object;
+    struct Object;
 
     class Map
     {
     public:
-        using ObjectPtr = std::shared_ptr<Object>;
         class Field
         {
         public:
-            void AddObject(ObjectPtr object)
+            Field(std::size_t x = 0, std::size_t y = 0) noexcept
+            : x(x), y(y)
+            {}
+            std::size_t x, y;
+            Field(const Field&) = default;
+
+            friend auto GetTie(const Field& field) noexcept
             {
-                objects.insert(std::move(object));
+                return std::tie(field.x, field.y);
             }
-            void RemoveObject(ObjectPtr object)
+            friend bool operator==(const Field& a, const Field& b) noexcept
             {
-                objects.erase(object);
+                return GetTie(a) == GetTie(b);
             }
-            const auto& GetObjects() const noexcept
+            friend bool operator<(const Field& a, const Field& b) noexcept
             {
-                return objects;
+                return GetTie(a) < GetTie(b);
             }
-        private:
-            std::set<ObjectPtr> objects;
         };
-        using OnBindEvent = IEvent<Field>;
+        using OnBindEvent = IEvent<Field, Object::Ptr>;
     public:
         OnBindEvent event;
     public:
         Map(std::size_t h, std::size_t w);
-        void BindObject(std::size_t h, std::size_t w, ObjectPtr object);
+        void BindObject(Field field, Object::Ptr object);
     private:
         const std::size_t H, W;
-        std::vector<Field> fields;
+        //std::vector<Field> fields;
     };
 
 }

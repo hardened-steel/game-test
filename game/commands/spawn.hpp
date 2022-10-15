@@ -8,11 +8,11 @@ namespace game::commands {
     struct Spawn: public Command<Spawn>
     {
         std::size_t id;
-        std::size_t X, Y;
+        std::size_t x, y;
         std::size_t damage;
 
         Spawn(std::size_t id, std::size_t x, std::size_t y, std::size_t damage) noexcept
-        : id(id), X(x), Y(y), damage(damage)
+        : id(id), x(x), y(y), damage(damage)
         {}
     };
 

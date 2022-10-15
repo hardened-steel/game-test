@@ -12,16 +12,20 @@ namespace game::engine {
     public:
         using TriggerPtr = std::shared_ptr<ITrigger<Ts...>>;
     public:
-        virtual void emit(Ts ...args) const
+        virtual void Emit(Ts ...args) const
         {
             for (const auto& trigger: triggers)
             {
-                trigger->action(args...);
+                trigger->Action(args...);
             }
         }
-        virtual void subscribe(TriggerPtr trigger)
+        virtual void Subscribe(TriggerPtr trigger)
         {
             triggers.insert(std::move(trigger));
+        }
+        virtual void Unsubscribe(TriggerPtr trigger)
+        {
+            triggers.erase(trigger);
         }
     protected:
         std::set<TriggerPtr> triggers;

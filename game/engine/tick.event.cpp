@@ -2,9 +2,10 @@
 
 namespace game::engine {
 
-    void TickEvent::emit() const
+    std::size_t TickEvent::emit() const
     {
         tick.count += 1;
-        IEvent<Tick>::emit(tick);
+        IEvent<Tick>::Emit(tick);
+        return tick.count;
     }
 }

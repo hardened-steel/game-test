@@ -10,22 +10,21 @@ namespace game::engine {
         using ObjectPtr = std::shared_ptr<Object>;
     public:
         TickEvent event;
+        Map map;
     public:
         Engine(std::size_t h, std::size_t w)
         : map(w, h)
         {}
 
-        void AddObject(std::size_t h, std::size_t w, ObjectPtr object)
+        void AddObject(std::size_t x, std::size_t y, ObjectPtr object)
         {
-            map.BindObject(h, w, std::move(object));
+            map.BindObject(Map::Field(x, y), std::move(object));
         }
     public: 
-        void tick()
+        std::size_t Tick()
         {
-            event.emit();
+            return event.emit();
         }
-    private:
-        Map map;
     };
 
 }
