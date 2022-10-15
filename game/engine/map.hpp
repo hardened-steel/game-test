@@ -4,7 +4,7 @@
 #include "object.hpp"
 #include "event.hpp"
 
-namespace game {
+namespace game::engine {
 
     class Object;
 
@@ -34,10 +34,10 @@ namespace game {
     public:
         OnBindEvent event;
     public:
-        Map(std::size_t w, std::size_t h);
-        void BindObject(std::size_t w, std::size_t h, ObjectPtr object);
+        Map(std::size_t h, std::size_t w);
+        void BindObject(std::size_t h, std::size_t w, ObjectPtr object);
     private:
-        const std::size_t W, H;
+        const std::size_t H, W;
         std::vector<Field> fields;
     };
 

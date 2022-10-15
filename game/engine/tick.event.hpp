@@ -1,7 +1,7 @@
 #pragma once
 #include "event.hpp"
 
-namespace game {
+namespace game::engine {
 
     struct Tick
     {
@@ -11,11 +11,7 @@ namespace game {
     class TickEvent: public IEvent<Tick>
     {
     public:
-        void emit() const
-        {
-            tick.count += 1;
-            IEvent<Tick>::emit(tick);
-        }
+        void emit() const;
     private:
         mutable Tick tick;
     };

@@ -2,7 +2,7 @@
 #include <set>
 #include <memory>
 
-namespace game {
+namespace game::engine {
 
     class Trigger
     {

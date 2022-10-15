@@ -4,7 +4,7 @@
 
 #include "trigger.hpp"
 
-namespace game {
+namespace game::engine {
 
     template<class ...Ts>
     class IEvent

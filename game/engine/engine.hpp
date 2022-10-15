@@ -2,7 +2,7 @@
 #include "map.hpp"
 #include "tick.event.hpp"
 
-namespace game {
+namespace game::engine {
 
     class Engine
     {
@@ -11,13 +11,13 @@ namespace game {
     public:
         TickEvent event;
     public:
-        Engine(std::size_t w, std::size_t h)
+        Engine(std::size_t h, std::size_t w)
         : map(w, h)
         {}
 
-        void AddObject(std::size_t w, std::size_t h, ObjectPtr object)
+        void AddObject(std::size_t h, std::size_t w, ObjectPtr object)
         {
-            map.BindObject(w, h, std::move(object));
+            map.BindObject(h, w, std::move(object));
         }
     public: 
         void tick()
