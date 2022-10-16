@@ -9,7 +9,8 @@ namespace game::engine {
     public:
         using ObjectPtr = std::shared_ptr<Object>;
     public:
-        TickEvent event;
+        StartTickEvent start;
+        EndTickEvent end;
         Map map;
     public:
         Engine(std::size_t h, std::size_t w)
@@ -21,9 +22,11 @@ namespace game::engine {
             map.BindObject(Map::Field(x, y), std::move(object));
         }
     public: 
-        std::size_t Tick()
+        auto Tick()
         {
-            return event.emit();
+            auto tick = start.Emit();
+            end.Emit(tick);
+            return tick;
         }
     };
 

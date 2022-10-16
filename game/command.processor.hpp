@@ -19,8 +19,9 @@ namespace game {
                 warriors = std::make_shared<TriggerWarrior>(engine->map);
                 log = std::make_shared<TriggerLog>(std::cout);
                 engine->map.event.Subscribe(warriors);
-                engine->event.Subscribe(warriors);
-                engine->event.Subscribe(log);
+                engine->start.Subscribe(warriors);
+                engine->start.Subscribe(log);
+                engine->end.Subscribe(log);
                 warriors->OnMarchStarted.Subscribe(log);
                 warriors->OnMarchFinished.Subscribe(log);
                 warriors->OnWarriroCreate.Subscribe(log);
