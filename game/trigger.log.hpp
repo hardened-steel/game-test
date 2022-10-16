@@ -1,6 +1,8 @@
 #pragma once
 #include <ostream>
 #include "trigger.warrior.hpp"
+#include "commands/create.map.hpp"
+#include "commands/finish.hpp"
 
 namespace game {
 
@@ -10,6 +12,8 @@ namespace game {
         , public engine::ITrigger<TriggerWarrior::CreateWarriroEvent>
         , public engine::ITrigger<TriggerWarrior::BattleEvent>
         , public engine::ITrigger<engine::Tick>
+        , public engine::ITrigger<game::commands::CreateMap>
+        , public engine::ITrigger<game::commands::Finish>
     {
     public:
         explicit TriggerLog(std::ostream& stream) noexcept
@@ -18,18 +22,15 @@ namespace game {
     public:
         void Action(TriggerWarrior::MarchStartEvent info) override
         {
-            message += " MARCH " + std::to_string(info.warrior->id) + " TO " + std::to_string(info.field.x) + " " + std::to_string(info.field.y);
-            //stream << message << std::endl;
+            message += " MARCH STARTED " + std::to_string(info.warrior->id) + " TO " + std::to_string(info.field.x) + " " + std::to_string(info.field.y);
         }
         void Action(TriggerWarrior::MarchFinishEvent info) override
         {
             message += " MARCH " + std::to_string(info.warrior->id) + " FINISHED " + std::to_string(info.field.x) + " " + std::to_string(info.field.y);
-            //stream << message << std::endl;
         }
         void Action(TriggerWarrior::CreateWarriroEvent info) override
         {
             message += " WARRIOR SPAWNED " + std::to_string(info.warrior->id) + " ON " + std::to_string(info.field.x) + " " + std::to_string(info.field.y);
-            //stream << message << std::endl;
         }
         void Action(TriggerWarrior::BattleEvent info) override
         {
@@ -39,11 +40,9 @@ namespace game {
             } else {
                 message += " ALL DEAD";
             }
-            //stream << message << std::endl;
         }
         void Action(engine::Tick tick) override
         {
-            //stream << "[" << tick.count << "]" << "{" << this->tick.count << "}" << message << std::endl;
             if (tick == this->tick) {
                 if(!message.empty()) {
                     stream << "[" << this->tick.count << "]" << message << std::endl;
@@ -52,6 +51,14 @@ namespace game {
             } else {
                 this->tick = tick;
             }
+        }
+        void Action(game::commands::CreateMap info) override
+        {
+            message += " MAP CREATED " + std::to_string(info.H) + " " + std::to_string(info.W);
+        }
+        void Action(game::commands::Finish info) override
+        {
+            message += " FINISH";
         }
     private:
         engine::Tick tick;

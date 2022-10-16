@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <cmath>
 #include "object.warrior.hpp"
 #include "engine/object.hpp"
 #include "engine/tick.event.hpp"
@@ -51,15 +52,14 @@ namespace game {
             if(auto it = bindes.find(field); it != bindes.end()) {
                 auto& [field, warrior_p] = *it;
                 if(warrior_p->damage < warrior_a->damage) {
+                    OnBattle.Emit({warrior_a, warrior_p, warrior_a});
                     warrior_p = warrior_a;
                     warriors[warrior_a] = field;
                     warriors.erase(warrior_p);
-                    OnBattle.Emit({warrior_a, warrior_p, warrior_a});
-                }
-                if(warrior_p->damage == warrior_a->damage) {
+                } else if(warrior_p->damage == warrior_a->damage) {
+                    OnBattle.Emit({warrior_a, warrior_p, nullptr});
                     bindes.erase(it);
                     warriors.erase(warrior_p);
-                    OnBattle.Emit({warrior_a, warrior_p, nullptr});
                 } else {
                     OnBattle.Emit({warrior_a, warrior_p, warrior_p});
                 }
@@ -91,12 +91,14 @@ namespace game {
         }
         void March(engine::Map::Field to, Warrior::Ptr warrior)
         {
+            OnMarchStarted.Emit({warrior, to});
             if(auto it = warriors.find(warrior); it != warriors.end()) {
                 auto& field = it->second;
                 bindes.erase(field);
                 warriors.erase(warrior);
-                movings[warrior] = MarchInfo{10, to};
-                OnMarchStarted.Emit({warrior, to});
+                auto ticks = std::round(std::sqrt((to.x - field.x) * (to.x - field.x) + (to.y - field.y) * (to.y - field.y)));
+                movings[warrior] = MarchInfo{static_cast<std::size_t>(ticks), to};
+                
             }
         }
         void CreateWarrior(engine::Map::Field field, Warrior::Ptr warrior)
@@ -107,6 +109,19 @@ namespace game {
         void BindWarrior(engine::Map::Field field, Warrior::Ptr warrior)
         {
             map.BindObject(field, warrior);
+        }
+        auto MarchCount() const noexcept
+        {
+            return movings.size();
+        }
+        Warrior::Ptr FindWarrior(std::size_t id) const noexcept
+        {
+            for(const auto& [warrior, field]: warriors) {
+                if(warrior->id == id) {
+                    return warrior;
+                }
+            }
+            return nullptr;
         }
     private:
         engine::Map& map;

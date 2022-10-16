@@ -3,6 +3,9 @@ project(game-commands-lib LANGUAGES CXX C VERSION 0.0.1)
 set(SOURCES
     create.map.cpp
     spawn.cpp
+    march.cpp
+    wait.cpp
+    finish.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

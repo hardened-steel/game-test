@@ -3,6 +3,9 @@
 #include "commands/executor.hpp"
 #include "commands/create.map.hpp"
 #include "commands/spawn.hpp"
+#include "commands/march.hpp"
+#include "commands/wait.hpp"
+#include "commands/finish.hpp"
 #include "engine/engine.hpp"
 #include "object.warrior.hpp"
 #include "trigger.warrior.hpp"
@@ -11,6 +14,8 @@
 namespace game {
     class CommandProcessor: public game::commands::Visitor
     {
+        engine::IEvent<game::commands::CreateMap> OnCreateMap;
+        engine::IEvent<game::commands::Finish> OnFinish;
     public:
         void Process(const game::commands::CreateMap& command) override
         {
@@ -26,7 +31,12 @@ namespace game {
                 warriors->OnMarchFinished.Subscribe(log);
                 warriors->OnWarriroCreate.Subscribe(log);
                 warriors->OnBattle.Subscribe(log);
-                std::cout << "[0] MAP CREATED " << command.H << " " << command.W << std::endl;
+                OnCreateMap.Subscribe(log);
+                OnFinish.Subscribe(log);
+
+                engine->TickStart();
+                OnCreateMap.Emit(command);
+                engine->TickEnd();
             } else {
 
             }
@@ -39,6 +49,43 @@ namespace game {
                 engine->TickEnd();
             } else {
             }
+        }
+        void Process(const game::commands::March& command) override
+        {
+            if(engine) {
+                engine->TickStart();
+                if(auto warrior = warriors->FindWarrior(command.id)) {
+                    warriors->March(engine::Map::Field(command.x, command.y), warrior);
+                } else {
+                    std::cerr << "warrior not found" << std::endl;
+                }
+                engine->TickEnd();
+            } else {
+            }
+        }
+        void Process(const game::commands::Wait& command) override
+        {
+            if(engine) {
+                for(std::size_t i = 0; i < command.ticks; ++i) {
+                    engine->TickStart();
+                    engine->TickEnd();
+                }
+            } else {
+            }
+        }
+        void Process(const game::commands::Finish& command) override
+        {
+            if(engine) {
+                while(warriors->MarchCount()) {
+                    engine->TickStart();
+                    engine->TickEnd();
+                }
+                engine->TickStart();
+                OnFinish.Emit(command);
+                engine->TickEnd();
+            } else {
+            }
+            
         }
     private:
         std::shared_ptr<TriggerWarrior> warriors;

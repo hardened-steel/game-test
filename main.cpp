@@ -11,10 +11,13 @@ int main(int argc, char* argv[])
         game::commands::Executor<std::string> executor;
         executor.AddParser<game::commands::CreateMap>();
         executor.AddParser<game::commands::Spawn>();
+        executor.AddParser<game::commands::Wait>();
+        executor.AddParser<game::commands::March>();
+        executor.AddParser<game::commands::Finish>();
         std::string command;
         while(getline(file, command)) {
-            executor.Process(command, processor);
             //std::cout << "execute command: \"" << command << "\"" << std::endl;
+            executor.Process(command, processor);
         }
     }
     return 0;
