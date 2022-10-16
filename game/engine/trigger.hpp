@@ -14,6 +14,6 @@ namespace game::engine {
     class ITrigger
     {
     public:
-        virtual void Action(Ts ...args) = 0;
+        virtual void Action(const Ts& ...args) = 0;
     };
 }

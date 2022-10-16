@@ -20,19 +20,19 @@ namespace game {
         : stream(stream)
         {}
     public:
-        void Action(TriggerWarrior::MarchStartEvent info) override
+        void Action(const TriggerWarrior::MarchStartEvent& info) override
         {
             message += " MARCH STARTED " + std::to_string(info.warrior->id) + " TO " + std::to_string(info.field.x) + " " + std::to_string(info.field.y);
         }
-        void Action(TriggerWarrior::MarchFinishEvent info) override
+        void Action(const TriggerWarrior::MarchFinishEvent& info) override
         {
             message += " MARCH " + std::to_string(info.warrior->id) + " FINISHED " + std::to_string(info.field.x) + " " + std::to_string(info.field.y);
         }
-        void Action(TriggerWarrior::CreateWarriroEvent info) override
+        void Action(const TriggerWarrior::CreateWarriroEvent& info) override
         {
             message += " WARRIOR SPAWNED " + std::to_string(info.warrior->id) + " ON " + std::to_string(info.field.x) + " " + std::to_string(info.field.y);
         }
-        void Action(TriggerWarrior::BattleEvent info) override
+        void Action(const TriggerWarrior::BattleEvent& info) override
         {
             message += " BATTLE " + std::to_string(info.warrior_a->id) + " " + std::to_string(info.warrior_p->id);
             if(info.winner) {
@@ -41,7 +41,7 @@ namespace game {
                 message += " ALL DEAD";
             }
         }
-        void Action(engine::Tick tick) override
+        void Action(const engine::Tick& tick) override
         {
             if (tick == this->tick) {
                 if(!message.empty()) {
@@ -52,11 +52,11 @@ namespace game {
                 this->tick = tick;
             }
         }
-        void Action(game::commands::CreateMap info) override
+        void Action(const game::commands::CreateMap& info) override
         {
             message += " MAP CREATED " + std::to_string(info.H) + " " + std::to_string(info.W);
         }
-        void Action(game::commands::Finish info) override
+        void Action(const game::commands::Finish& info) override
         {
             message += " FINISH";
         }

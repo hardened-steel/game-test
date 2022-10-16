@@ -10,25 +10,25 @@ namespace game::engine {
     class IEvent
     {
     public:
-        using TriggerPtr = std::shared_ptr<ITrigger<Ts...>>;
+        using Trigger = ITrigger<Ts...>;
     public:
-        virtual void Emit(Ts ...args) const
+        virtual void Emit(const Ts& ...args) const
         {
             for (const auto& trigger: triggers)
             {
                 trigger->Action(args...);
             }
         }
-        virtual void Subscribe(TriggerPtr trigger)
+        virtual void Subscribe(Trigger& trigger)
         {
-            triggers.insert(std::move(trigger));
+            triggers.insert(&trigger);
         }
-        virtual void Unsubscribe(TriggerPtr trigger)
+        virtual void Unsubscribe(Trigger& trigger)
         {
-            triggers.erase(trigger);
+            triggers.erase(&trigger);
         }
     protected:
-        std::set<TriggerPtr> triggers;
+        std::set<Trigger*> triggers;
     };
 
 }

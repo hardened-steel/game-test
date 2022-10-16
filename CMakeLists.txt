@@ -16,7 +16,3 @@ set_target_properties(${PROJECT_NAME}
         C_EXTENSIONS YES
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC game-commands-lib)
-#add_test(NAME LibUnits COMMAND ${PROJECT_NAME}-test)
-#install(TARGETS ${PROJECT_NAME}-test RUNTIME DESTINATION bin)
-
-#sinclude(CPack)

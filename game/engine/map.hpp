@@ -1,6 +1,5 @@
 #pragma once
 #include <memory>
-#include <vector>
 #include <tuple>
 #include "object.hpp"
 #include "event.hpp"
@@ -38,11 +37,10 @@ namespace game::engine {
     public:
         OnBindEvent event;
     public:
-        Map(std::size_t h, std::size_t w);
+        Map(std::size_t h, std::size_t w) noexcept;
         void BindObject(Field field, Object::Ptr object);
     private:
         const std::size_t H, W;
-        //std::vector<Field> fields;
     };
 
 }

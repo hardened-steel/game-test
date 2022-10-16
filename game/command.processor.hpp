@@ -21,10 +21,11 @@ namespace game {
         {
             if(!engine) {
                 engine.emplace(command.H, command.W);
-                warriors = std::make_shared<TriggerWarrior>(engine->map);
-                log = std::make_shared<TriggerLog>(std::cout);
-                engine->map.event.Subscribe(warriors);
-                engine->start.Subscribe(warriors);
+                warriors.emplace(engine->map);
+
+                engine->map.event.Subscribe(*warriors);
+                engine->start.Subscribe(*warriors);
+
                 engine->start.Subscribe(log);
                 engine->end.Subscribe(log);
                 warriors->OnMarchStarted.Subscribe(log);
@@ -57,7 +58,6 @@ namespace game {
                 if(auto warrior = warriors->FindWarrior(command.id)) {
                     warriors->March(engine::Map::Field(command.x, command.y), warrior);
                 } else {
-                    std::cerr << "warrior not found" << std::endl;
                 }
                 engine->TickEnd();
             } else {
@@ -88,8 +88,8 @@ namespace game {
             
         }
     private:
-        std::shared_ptr<TriggerWarrior> warriors;
-        std::shared_ptr<TriggerLog> log;
+        TriggerLog log {std::cout};
+        std::optional<TriggerWarrior> warriors;
         std::optional<engine::Engine> engine;
     };
 }

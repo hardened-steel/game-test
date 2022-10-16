@@ -2,7 +2,7 @@
 
 namespace game::engine {
 
-    Map::Map(std::size_t h, std::size_t w)
+    Map::Map(std::size_t h, std::size_t w) noexcept
     : H(h), W(w)
     {
     }

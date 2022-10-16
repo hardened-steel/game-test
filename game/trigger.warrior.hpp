@@ -58,8 +58,8 @@ namespace game {
                     warriors.erase(warrior_p);
                 } else if(warrior_p->damage == warrior_a->damage) {
                     OnBattle.Emit({warrior_a, warrior_p, nullptr});
-                    bindes.erase(it);
                     warriors.erase(warrior_p);
+                    bindes.erase(it);
                 } else {
                     OnBattle.Emit({warrior_a, warrior_p, warrior_p});
                 }
@@ -68,7 +68,7 @@ namespace game {
                 warriors[warrior_a] = field;
             }
         }
-        void Action(engine::Map::Field field, engine::Object::Ptr object) override
+        void Action(const engine::Map::Field& field, const engine::Object::Ptr& object) override
         {
             if(object->type == Warrior::type) {
                 auto warrior_a = std::static_pointer_cast<Warrior>(object);
@@ -76,7 +76,7 @@ namespace game {
                 Battle(field, warrior_a);
             }
         }
-        void Action(engine::Tick tick) override
+        void Action(const engine::Tick& tick) override
         {
             for (auto it = movings.begin(); it != movings.end();)
             {
@@ -94,11 +94,12 @@ namespace game {
             OnMarchStarted.Emit({warrior, to});
             if(auto it = warriors.find(warrior); it != warriors.end()) {
                 auto& field = it->second;
-                bindes.erase(field);
-                warriors.erase(warrior);
+
                 auto ticks = std::round(std::sqrt((to.x - field.x) * (to.x - field.x) + (to.y - field.y) * (to.y - field.y)));
                 movings[warrior] = MarchInfo{static_cast<std::size_t>(ticks), to};
-                
+
+                bindes.erase(field);
+                warriors.erase(it);
             }
         }
         void CreateWarrior(engine::Map::Field field, Warrior::Ptr warrior)
