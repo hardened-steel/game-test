@@ -1,5 +1,6 @@
 #pragma once
 #include <optional>
+#include <iostream>
 #include "commands/executor.hpp"
 #include "commands/create.map.hpp"
 #include "commands/spawn.hpp"
@@ -31,6 +32,7 @@ namespace game {
         };
         engine::IEvent<game::commands::CreateMap> OnCreateMap;
         engine::IEvent<game::commands::Finish> OnFinish;
+        engine::IEvent<std::string> OnError;
     public:
         void Process(const game::commands::CreateMap& command) override
         {
@@ -39,20 +41,27 @@ namespace game {
 
                 OnCreateMap.Subscribe(engine->log);
                 OnFinish.Subscribe(engine->log);
+                OnError.Subscribe(engine->log);
 
                 engine->TickStart();
                 OnCreateMap.Emit(command);
                 engine->TickEnd();
             } else {
+                std::cerr << "MAP NOT CREATED" << std::endl;
             }
         }
         void Process(const game::commands::Spawn& command) override
         {
             if(engine) {
                 engine->TickStart();
-                engine->marches.CreateWarrior(engine::Map::Field(command.x, command.y), std::make_shared<Warrior>(command.id, command.damage));
+                if(auto warrior = engine->marches.FindWarrior(command.id)) {
+                    OnError.Emit("WARRIOR " + std::to_string((command.id)) + " ALREADY EXISTS");
+                } else {
+                    engine->marches.CreateWarrior(engine::Map::Field(command.x, command.y), std::make_shared<Warrior>(command.id, command.damage));
+                }
                 engine->TickEnd();
             } else {
+                std::cerr << "MAP NOT CREATED" << std::endl;
             }
         }
         void Process(const game::commands::March& command) override
@@ -62,9 +71,11 @@ namespace game {
                 if(auto warrior = engine->marches.FindWarrior(command.id)) {
                     engine->marches.March(engine::Map::Field(command.x, command.y), warrior);
                 } else {
+                    OnError.Emit("WARRIOR " + std::to_string((command.id)) + " NOT FOUND");
                 }
                 engine->TickEnd();
             } else {
+                std::cerr << "MAP NOT CREATED" << std::endl;
             }
         }
         void Process(const game::commands::Wait& command) override
@@ -75,6 +86,7 @@ namespace game {
                     engine->TickEnd();
                 }
             } else {
+                std::cerr << "MAP NOT CREATED" << std::endl;
             }
         }
         void Process(const game::commands::Finish& command) override
@@ -88,6 +100,7 @@ namespace game {
                 OnFinish.Emit(command);
                 engine->TickEnd();
             } else {
+                std::cerr << "MAP NOT CREATED" << std::endl;
             }
         }
     private:

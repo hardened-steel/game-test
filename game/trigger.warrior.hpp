@@ -5,7 +5,10 @@
 
 namespace game {
 
-    class TriggerWarrior: public engine::ITrigger<engine::Map::Field, engine::Object::Ptr>
+    class TriggerWarrior
+        : public engine::Trigger<2, TriggerMarch::CreateWarriroEvent>
+        , public engine::Trigger<2, TriggerMarch::MarchStartEvent>
+        , public engine::Trigger<2, TriggerMarch::MarchFinishEvent>
     {
     public:
         struct BattleEvent
@@ -20,11 +23,15 @@ namespace game {
         explicit TriggerWarrior(TriggerMarch& march)
         : march(march)
         {
-            march.OnBind.Subscribe(*this);
+            march.OnMarchStarted.Subscribe(*this);
+            march.OnMarchFinished.Subscribe(*this);
+            march.OnWarriroCreate.Subscribe(*this);
         }
         ~TriggerWarrior() noexcept
         {
-            march.OnBind.UnSubscribe(*this);
+            march.OnMarchStarted.UnSubscribe(*this);
+            march.OnMarchFinished.UnSubscribe(*this);
+            march.OnWarriroCreate.UnSubscribe(*this);
         }
     public:
         void Battle(engine::Map::Field field, Warrior::Ptr warrior_a)
@@ -51,12 +58,17 @@ namespace game {
                 warriors[field] = warrior_a;
             }
         }
-        void Action(const engine::Map::Field& field, const engine::Object::Ptr& object) override
+        void Action(const TriggerMarch::CreateWarriroEvent& info) override
         {
-            if(object->type == Warrior::type) {
-                auto warrior_a = std::static_pointer_cast<Warrior>(object);
-                Battle(field, warrior_a);
-            }
+            Battle(info.field, info.warrior);
+        }
+        void Action(const TriggerMarch::MarchStartEvent& info) override
+        {
+            warriors.erase(info.from);
+        }
+        void Action(const TriggerMarch::MarchFinishEvent& info) override
+        {
+            Battle(info.field, info.warrior);
         }
     private:
         TriggerMarch& march;

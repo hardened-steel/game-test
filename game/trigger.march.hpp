@@ -8,7 +8,7 @@
 
 namespace game {
 
-    class TriggerMarch: public engine::ITrigger<engine::Map::Field, engine::Object::Ptr>, public engine::ITrigger<engine::Tick>
+    class TriggerMarch: public engine::Trigger<1, engine::Map::Field, engine::Object::Ptr>, public engine::Trigger<1, engine::Tick>
     {
         struct MarchInfo
         {
@@ -19,7 +19,7 @@ namespace game {
         struct MarchStartEvent
         {
             Warrior::Ptr warrior;
-            engine::Map::Field field;
+            engine::Map::Field from, to;
         };
         struct MarchFinishEvent
         {
@@ -51,17 +51,14 @@ namespace game {
     public:
         void Action(const engine::Map::Field& field, const engine::Object::Ptr& object) override
         {
-            if(object->type == Warrior::type) {
-                auto warrior_a = std::static_pointer_cast<Warrior>(object);
-                OnMarchFinished.Emit({warrior_a, field});
-            }
         }
         void Action(const engine::Tick& tick) override
         {
             for (auto it = movings.begin(); it != movings.end();)
             {
                 auto& [warrior, march] = *it;
-                if (--march.ticks == 0) {
+                if (march.ticks-- == 0) {
+                    OnMarchFinished.Emit({warrior, march.to});
                     BindWarrior(march.to, warrior);
                     it = movings.erase(it);
                 } else {
@@ -77,8 +74,8 @@ namespace game {
                 auto ticks = std::round(std::sqrt((to.x - from.x) * (to.x - from.x) + (to.y - from.y) * (to.y - from.y)));
                 movings[warrior] = MarchInfo{static_cast<std::size_t>(ticks), from, to};
 
+                OnMarchStarted.Emit({warrior, from, to});
                 warriors.erase(it);
-                OnMarchStarted.Emit({warrior, to});
             }
         }
         void CreateWarrior(engine::Map::Field field, Warrior::Ptr warrior)

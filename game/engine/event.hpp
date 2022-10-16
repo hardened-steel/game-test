@@ -1,5 +1,5 @@
 #pragma once
-#include <set>
+#include <map>
 #include <memory>
 
 #include "trigger.hpp"
@@ -14,21 +14,21 @@ namespace game::engine {
     public:
         virtual void Emit(const Ts& ...args) const
         {
-            for (const auto& trigger: triggers)
+            for (const auto& [id, trigger]: triggers)
             {
                 trigger->Action(args...);
             }
         }
         virtual void Subscribe(Trigger& trigger)
         {
-            triggers.insert(&trigger);
+            triggers[trigger.id] = &trigger;
         }
         virtual void UnSubscribe(Trigger& trigger)
         {
-            triggers.erase(&trigger);
+            triggers.erase(trigger.id);
         }
     protected:
-        std::set<Trigger*> triggers;
+        std::map<std::size_t, Trigger*> triggers;
     };
 
 }

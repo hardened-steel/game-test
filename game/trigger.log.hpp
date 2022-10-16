@@ -8,13 +8,14 @@
 namespace game {
 
     class TriggerLog
-        : public engine::ITrigger<TriggerMarch::MarchStartEvent>
-        , public engine::ITrigger<TriggerMarch::MarchFinishEvent>
-        , public engine::ITrigger<TriggerMarch::CreateWarriroEvent>
-        , public engine::ITrigger<TriggerWarrior::BattleEvent>
-        , public engine::ITrigger<engine::Tick>
-        , public engine::ITrigger<game::commands::CreateMap>
-        , public engine::ITrigger<game::commands::Finish>
+        : public engine::Trigger<0, TriggerMarch::MarchStartEvent>
+        , public engine::Trigger<0, TriggerMarch::MarchFinishEvent>
+        , public engine::Trigger<0, TriggerMarch::CreateWarriroEvent>
+        , public engine::Trigger<0, TriggerWarrior::BattleEvent>
+        , public engine::Trigger<0, engine::Tick>
+        , public engine::Trigger<0, game::commands::CreateMap>
+        , public engine::Trigger<0, game::commands::Finish>
+        , public engine::Trigger<0, std::string>
     {
     public:
         TriggerLog(std::ostream& stream, TriggerMarch& marches, TriggerWarrior& warriors, engine::Engine& engine)
@@ -39,7 +40,7 @@ namespace game {
     public:
         void Action(const TriggerMarch::MarchStartEvent& info) override
         {
-            message += " MARCH STARTED " + std::to_string(info.warrior->id) + " TO " + std::to_string(info.field.x) + " " + std::to_string(info.field.y);
+            message += " MARCH STARTED " + std::to_string(info.warrior->id) + " TO " + std::to_string(info.to.x) + " " + std::to_string(info.to.y);
         }
         void Action(const TriggerMarch::MarchFinishEvent& info) override
         {
@@ -76,6 +77,10 @@ namespace game {
         void Action(const game::commands::Finish& info) override
         {
             message += " FINISH";
+        }
+        void Action(const std::string& info) override
+        {
+            message += " " + info;
         }
     private:
         std::ostream& stream;
