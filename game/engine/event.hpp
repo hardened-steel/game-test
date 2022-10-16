@@ -23,7 +23,7 @@ namespace game::engine {
         {
             triggers.insert(&trigger);
         }
-        virtual void Unsubscribe(Trigger& trigger)
+        virtual void UnSubscribe(Trigger& trigger)
         {
             triggers.erase(&trigger);
         }

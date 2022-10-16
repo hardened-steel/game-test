@@ -6,47 +6,51 @@
 #include "commands/march.hpp"
 #include "commands/wait.hpp"
 #include "commands/finish.hpp"
+
 #include "engine/engine.hpp"
 #include "object.warrior.hpp"
+#include "trigger.march.hpp"
 #include "trigger.warrior.hpp"
 #include "trigger.log.hpp"
 
 namespace game {
     class CommandProcessor: public game::commands::Visitor
     {
+        class Engine: public engine::Engine
+        {
+        public:
+            TriggerMarch marches {engine::Engine::map, engine::Engine::start};
+            TriggerWarrior warriors {marches};
+
+            TriggerLog log;
+        public:
+            Engine(std::ostream& stream, const game::commands::CreateMap& command)
+            : engine::Engine(command.H, command.W)
+            , log(stream, marches, warriors, *this)
+            {}
+        };
         engine::IEvent<game::commands::CreateMap> OnCreateMap;
         engine::IEvent<game::commands::Finish> OnFinish;
     public:
         void Process(const game::commands::CreateMap& command) override
         {
             if(!engine) {
-                engine.emplace(command.H, command.W);
-                warriors.emplace(engine->map);
+                engine.emplace(std::cout, command);
 
-                engine->map.event.Subscribe(*warriors);
-                engine->start.Subscribe(*warriors);
-
-                engine->start.Subscribe(log);
-                engine->end.Subscribe(log);
-                warriors->OnMarchStarted.Subscribe(log);
-                warriors->OnMarchFinished.Subscribe(log);
-                warriors->OnWarriroCreate.Subscribe(log);
-                warriors->OnBattle.Subscribe(log);
-                OnCreateMap.Subscribe(log);
-                OnFinish.Subscribe(log);
+                OnCreateMap.Subscribe(engine->log);
+                OnFinish.Subscribe(engine->log);
 
                 engine->TickStart();
                 OnCreateMap.Emit(command);
                 engine->TickEnd();
             } else {
-
             }
         }
         void Process(const game::commands::Spawn& command) override
         {
             if(engine) {
                 engine->TickStart();
-                warriors->CreateWarrior(engine::Map::Field(command.x, command.y), std::make_shared<Warrior>(command.id, command.damage));
+                engine->marches.CreateWarrior(engine::Map::Field(command.x, command.y), std::make_shared<Warrior>(command.id, command.damage));
                 engine->TickEnd();
             } else {
             }
@@ -55,8 +59,8 @@ namespace game {
         {
             if(engine) {
                 engine->TickStart();
-                if(auto warrior = warriors->FindWarrior(command.id)) {
-                    warriors->March(engine::Map::Field(command.x, command.y), warrior);
+                if(auto warrior = engine->marches.FindWarrior(command.id)) {
+                    engine->marches.March(engine::Map::Field(command.x, command.y), warrior);
                 } else {
                 }
                 engine->TickEnd();
@@ -76,7 +80,7 @@ namespace game {
         void Process(const game::commands::Finish& command) override
         {
             if(engine) {
-                while(warriors->MarchCount()) {
+                while(engine->marches.MarchCount()) {
                     engine->TickStart();
                     engine->TickEnd();
                 }
@@ -85,11 +89,8 @@ namespace game {
                 engine->TickEnd();
             } else {
             }
-            
         }
     private:
-        TriggerLog log {std::cout};
-        std::optional<TriggerWarrior> warriors;
-        std::optional<engine::Engine> engine;
+        std::optional<Engine> engine;
     };
 }
