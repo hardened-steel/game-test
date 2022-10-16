@@ -26,7 +26,7 @@ namespace game {
                 warriors->OnMarchFinished.Subscribe(log);
                 warriors->OnWarriroCreate.Subscribe(log);
                 warriors->OnBattle.Subscribe(log);
-                std::cout << "[1] MAP CREATED " << command.H << " " << command.W << std::endl;
+                std::cout << "[0] MAP CREATED " << command.H << " " << command.W << std::endl;
             } else {
 
             }
@@ -34,8 +34,9 @@ namespace game {
         void Process(const game::commands::Spawn& command) override
         {
             if(engine) {
-                engine->Tick();
+                engine->TickStart();
                 warriors->CreateWarrior(engine::Map::Field(command.x, command.y), std::make_shared<Warrior>(command.id, command.damage));
+                engine->TickEnd();
             } else {
             }
         }

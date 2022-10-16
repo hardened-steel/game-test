@@ -19,14 +19,17 @@ namespace game {
         void Action(TriggerWarrior::MarchStartEvent info) override
         {
             message += " MARCH " + std::to_string(info.warrior->id) + " TO " + std::to_string(info.field.x) + " " + std::to_string(info.field.y);
+            //stream << message << std::endl;
         }
         void Action(TriggerWarrior::MarchFinishEvent info) override
         {
             message += " MARCH " + std::to_string(info.warrior->id) + " FINISHED " + std::to_string(info.field.x) + " " + std::to_string(info.field.y);
+            //stream << message << std::endl;
         }
         void Action(TriggerWarrior::CreateWarriroEvent info) override
         {
             message += " WARRIOR SPAWNED " + std::to_string(info.warrior->id) + " ON " + std::to_string(info.field.x) + " " + std::to_string(info.field.y);
+            //stream << message << std::endl;
         }
         void Action(TriggerWarrior::BattleEvent info) override
         {
@@ -36,9 +39,11 @@ namespace game {
             } else {
                 message += " ALL DEAD";
             }
+            //stream << message << std::endl;
         }
         void Action(engine::Tick tick) override
         {
+            //stream << "[" << tick.count << "]" << "{" << this->tick.count << "}" << message << std::endl;
             if (tick == this->tick) {
                 if(!message.empty()) {
                     stream << "[" << this->tick.count << "]" << message << std::endl;

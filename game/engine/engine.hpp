@@ -22,12 +22,16 @@ namespace game::engine {
             map.BindObject(Map::Field(x, y), std::move(object));
         }
     public: 
-        auto Tick()
+        auto TickStart()
         {
-            auto tick = start.Emit();
-            end.Emit(tick);
-            return tick;
+            return tick = start.Emit();
         }
+        auto TickEnd()
+        {
+            return end.Emit(tick);
+        }
+    private:
+        Tick tick;
     };
 
 }
