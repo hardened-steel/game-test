@@ -13,7 +13,7 @@ void RunGame(std::istream& stream)
     executor.AddParser<game::commands::Finish>();
     std::string command;
     while (getline(stream, command)) {
-        if (executor.Process(command, processor)) {
+        if (executor.Process(command, processor) && !command.empty()) {
             std::cerr << "unknown command: \"" << command << "\"" << std::endl;
         }
     }

@@ -1,6 +1,5 @@
 #pragma once
 #include <map>
-#include <cmath>
 #include "trigger.march.hpp"
 
 namespace game {
@@ -34,26 +33,24 @@ namespace game {
             march.OnWarriroCreate.UnSubscribe(*this);
         }
     public:
-        void Battle(engine::Map::Field field, Warrior::Ptr warrior_a)
+        void Battle(engine::Map::Field field, const Warrior::Ptr& warrior_a)
         {
             if (auto it = warriors.find(field); it != warriors.end()) {
                 auto& [field, warrior_p] = *it;
+                auto event = BattleEvent{warrior_a, warrior_p, nullptr};
                 if (warrior_p->damage < warrior_a->damage) {
-                    OnBattle.Emit({warrior_a, warrior_p, warrior_a});
-
+                    event.winner = warrior_a;
                     march.RemoveWarrior(warrior_p);
                     warrior_p = warrior_a;
                 } else if (warrior_p->damage == warrior_a->damage) {
-                    OnBattle.Emit({warrior_a, warrior_p, nullptr});
-
                     march.RemoveWarrior(warrior_a);
                     march.RemoveWarrior(warrior_p);
                     warriors.erase(it);
                 } else {
-                    OnBattle.Emit({warrior_a, warrior_p, warrior_p});
-
+                    event.winner = warrior_p;
                     march.RemoveWarrior(warrior_a);
                 }
+                OnBattle.Emit(event);
             } else {
                 warriors[field] = warrior_a;
             }
@@ -64,11 +61,24 @@ namespace game {
         }
         void Action(const TriggerMarch::MarchStartEvent& info) override
         {
-            warriors.erase(info.from);
+            if (auto it = warriors.find(info.from); it != warriors.end()) {
+                if (info.warrior == it->second) {
+                    warriors.erase(it);
+                }
+            }
         }
         void Action(const TriggerMarch::MarchFinishEvent& info) override
         {
             Battle(info.field, info.warrior);
+        }
+
+        std::string Status() const
+        {
+            std::stringstream ss;
+            for (const auto& [field, warrior]: warriors) {
+                ss << "WARRIOR " << warrior->id << " ON " << field.x << " " << field.y << std::endl;
+            }
+            return ss.str();
         }
     private:
         TriggerMarch& march;

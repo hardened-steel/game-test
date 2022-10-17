@@ -23,6 +23,7 @@ namespace game {
         public:
             TriggerMarch marches {engine::Engine::map, engine::Engine::start};
             TriggerBattle battles {marches};
+            TriggerReturn returns {battles, marches, *this};
 
             TriggerLog log;
         public:
@@ -77,7 +78,8 @@ namespace game {
             if (engine) {
                 engine->TickStart();
                 if (auto warrior = engine->marches.FindWarrior(command.id)) {
-                    if(engine->marches.March(engine::Map::Field(command.x, command.y), warrior)) {
+                    const engine::Map::Field field(command.x, command.y);
+                    if(engine->marches.March(field, warrior)) {
                         OnError.Emit("COORDINATES " + std::to_string((command.x)) + " " + std::to_string((command.y)) + " IS OUT OF MAP");
                     }
                 } else {

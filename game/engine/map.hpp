@@ -28,6 +28,10 @@ namespace game::engine {
             {
                 return GetTie(a) == GetTie(b);
             }
+            friend bool operator!=(const Field& a, const Field& b) noexcept
+            {
+                return GetTie(a) != GetTie(b);
+            }
             friend bool operator<(const Field& a, const Field& b) noexcept
             {
                 return GetTie(a) < GetTie(b);

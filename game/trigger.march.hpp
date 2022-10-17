@@ -3,6 +3,7 @@
 #include <cmath>
 #include <vector>
 #include <system_error>
+#include <sstream>
 #include "object.warrior.hpp"
 #include "engine/object.hpp"
 #include "engine/tick.event.hpp"
@@ -56,35 +57,56 @@ namespace game {
         }
         void Action(const engine::Tick& tick) override
         {
+            std::vector<MarchFinishEvent> events;
+            events.reserve(movings.size());
             for (auto it = movings.begin(); it != movings.end();)
             {
                 auto& [warrior, march] = *it;
                 if (march.ticks-- == 0) {
+                    events.push_back({warrior, march.to});
                     BindWarrior(march.to, warrior);
-                    OnMarchFinished.Emit({warrior, march.to});
                     it = movings.erase(it);
                 } else {
                     ++it;
                 }
             }
+            for (const auto& event: events) {
+                OnMarchFinished.Emit(event);
+            }
         }
-        std::error_code March(engine::Map::Field to, Warrior::Ptr warrior)
+        std::error_code March(engine::Map::Field from, engine::Map::Field to, const Warrior::Ptr& warrior)
         {
             if ((to.x < map.H) && (to.y < map.W)) {
-                if (auto it = warriors.find(warrior); it != warriors.end()) {
-                    auto& from = it->second;
-
+                if (from != to) {
                     auto ticks = std::round(std::sqrt((to.x - from.x) * (to.x - from.x) + (to.y - from.y) * (to.y - from.y)));
                     movings[warrior] = MarchInfo{static_cast<std::size_t>(ticks), from, to};
 
                     OnMarchStarted.Emit({warrior, from, to});
-                    warriors.erase(it);
-                    return std::error_code();
                 }
+                return std::error_code();
             }
             return std::make_error_code(std::errc::invalid_argument);
         }
-        std::error_code CreateWarrior(engine::Map::Field field, Warrior::Ptr warrior)
+        std::error_code March(engine::Map::Field to, const Warrior::Ptr& warrior)
+        {
+            if (auto it = warriors.find(warrior); it != warriors.end()) {
+                auto& from = it->second;
+                auto result = March(from, to, warrior);
+                if (result) {
+                    warriors.erase(it);
+                }
+                return result;
+            }
+            return std::make_error_code(std::errc::invalid_argument);
+        }
+        std::error_code March(engine::Map::Field to, std::size_t id)
+        {
+            if (auto warrior = FindWarrior(id)) {
+                return March(to, warrior);
+            }
+            return std::make_error_code(std::errc::invalid_argument);
+        }
+        std::error_code CreateWarrior(engine::Map::Field field, const  Warrior::Ptr& warrior)
         {
             if ((field.x < map.H) && (field.y < map.W)) {
                 BindWarrior(field, warrior);
@@ -93,7 +115,7 @@ namespace game {
             }
             return std::make_error_code(std::errc::invalid_argument);
         }
-        void BindWarrior(engine::Map::Field field, Warrior::Ptr warrior)
+        void BindWarrior(engine::Map::Field field, const Warrior::Ptr& warrior)
         {
             warriors[warrior] = field;
             map.BindObject(field, warrior);
@@ -124,6 +146,17 @@ namespace game {
                 }
             }
             return result;
+        }
+        std::string Status() const
+        {
+            std::stringstream ss;
+            for (const auto& [warrior, field]: warriors) {
+                ss << "WARRIOR " << warrior->id << " ON " << field.x << " " << field.y << std::endl;
+            }
+            if (!movings.empty()) {
+                ss << movings.size() << " WARRIORS ON MARCH" << std::endl;
+            }
+            return ss.str();
         }
     private:
         engine::Map& map;
