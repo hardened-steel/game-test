@@ -58,8 +58,8 @@ namespace game {
             {
                 auto& [warrior, march] = *it;
                 if (march.ticks-- == 0) {
-                    OnMarchFinished.Emit({warrior, march.to});
                     BindWarrior(march.to, warrior);
+                    OnMarchFinished.Emit({warrior, march.to});
                     it = movings.erase(it);
                 } else {
                     ++it;
@@ -68,20 +68,28 @@ namespace game {
         }
         void March(engine::Map::Field to, Warrior::Ptr warrior)
         {
-            if(auto it = warriors.find(warrior); it != warriors.end()) {
-                auto& from = it->second;
+            if((to.x < map.H) && (to.y < map.W)) {
+                if(auto it = warriors.find(warrior); it != warriors.end()) {
+                    auto& from = it->second;
 
-                auto ticks = std::round(std::sqrt((to.x - from.x) * (to.x - from.x) + (to.y - from.y) * (to.y - from.y)));
-                movings[warrior] = MarchInfo{static_cast<std::size_t>(ticks), from, to};
+                    auto ticks = std::round(std::sqrt((to.x - from.x) * (to.x - from.x) + (to.y - from.y) * (to.y - from.y)));
+                    movings[warrior] = MarchInfo{static_cast<std::size_t>(ticks), from, to};
 
-                OnMarchStarted.Emit({warrior, from, to});
-                warriors.erase(it);
+                    OnMarchStarted.Emit({warrior, from, to});
+                    warriors.erase(it);
+                }
+            } else {
+                /// @todo error here
             }
         }
         void CreateWarrior(engine::Map::Field field, Warrior::Ptr warrior)
         {
-            OnWarriroCreate.Emit({warrior, field});
-            BindWarrior(field, std::move(warrior));
+            if((field.x < map.H) && (field.y < map.W)) {
+                BindWarrior(field, warrior);
+                OnWarriroCreate.Emit({warrior, field});
+            } else {
+                /// @todo error here
+            }
         }
         void BindWarrior(engine::Map::Field field, Warrior::Ptr warrior)
         {

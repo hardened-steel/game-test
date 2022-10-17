@@ -39,7 +39,6 @@ namespace game::engine {
     public:
         Map(std::size_t h, std::size_t w) noexcept;
         void BindObject(Field field, Object::Ptr object);
-    private:
         const std::size_t H, W;
     };
 
