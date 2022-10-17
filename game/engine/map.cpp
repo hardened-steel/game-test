@@ -9,7 +9,7 @@ namespace game::engine {
 
     void Map::BindObject(Field field, Object::Ptr object)
     {
-        if((field.x < W) && (field.y < H))
+        if ((field.x < W) && (field.y < H))
         {
             event.Emit(field, std::move(object));
         }

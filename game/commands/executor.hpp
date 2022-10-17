@@ -16,15 +16,15 @@ namespace game::commands {
         {
             parsers.insert(std::make_shared<Parser<C, T>>(std::forward<TArgs>(args)...));
         }
-        void Process(const T& data, Visitor& visitor)
+        const T* Process(const T& data, Visitor& visitor)
         {
-            for(const auto& parser: parsers) {
-                if(auto command = parser->Parse(data)) {
+            for (const auto& parser: parsers) {
+                if (auto command = parser->Parse(data)) {
                     command->Accept(visitor);
-                    return;
+                    return nullptr;
                 }
             }
-            /// @todo add error process here
+            return &data;
         }
     private:
         std::set<ParserPtr> parsers;

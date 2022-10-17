@@ -7,8 +7,8 @@ namespace game::commands {
     {
         std::stringstream ss(data);
         std::string command;
-        if(ss >> command) {
-            if(command == "FINISH") {
+        if (ss >> command) {
+            if (command == "FINISH") {
                 return std::make_unique<Finish>();
             }
         }

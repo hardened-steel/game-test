@@ -36,14 +36,14 @@ namespace game {
     public:
         void Battle(engine::Map::Field field, Warrior::Ptr warrior_a)
         {
-            if(auto it = warriors.find(field); it != warriors.end()) {
+            if (auto it = warriors.find(field); it != warriors.end()) {
                 auto& [field, warrior_p] = *it;
-                if(warrior_p->damage < warrior_a->damage) {
+                if (warrior_p->damage < warrior_a->damage) {
                     OnBattle.Emit({warrior_a, warrior_p, warrior_a});
 
                     march.RemoveWarrior(warrior_p);
                     warrior_p = warrior_a;
-                } else if(warrior_p->damage == warrior_a->damage) {
+                } else if (warrior_p->damage == warrior_a->damage) {
                     OnBattle.Emit({warrior_a, warrior_p, nullptr});
 
                     march.RemoveWarrior(warrior_a);

@@ -8,8 +8,8 @@ namespace game::commands {
         std::stringstream ss(data);
         std::string command;
         std::size_t ticks;
-        if(ss >> command >> ticks) {
-            if(command == "WAIT") {
+        if (ss >> command >> ticks) {
+            if (command == "WAIT") {
                 return std::make_unique<Wait>(ticks);
             }
         }

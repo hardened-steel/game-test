@@ -8,8 +8,8 @@ namespace game::commands {
         std::stringstream ss(data);
         std::string command;
         std::size_t H, W;
-        if(ss >> command >> H >> W) {
-            if(command == "CREATE_MAP") {
+        if (ss >> command >> H >> W) {
+            if (command == "CREATE_MAP") {
                 return std::make_unique<CreateMap>(H, W);
             }
         }

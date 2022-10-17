@@ -12,9 +12,10 @@ void RunGame(std::istream& stream)
     executor.AddParser<game::commands::March>();
     executor.AddParser<game::commands::Finish>();
     std::string command;
-    while(getline(stream, command)) {
-        //std::cout << "execute command: \"" << command << "\"" << std::endl;
-        executor.Process(command, processor);
+    while (getline(stream, command)) {
+        if (executor.Process(command, processor)) {
+            std::cerr << "unknown command: \"" << command << "\"" << std::endl;
+        }
     }
 }
 
@@ -22,7 +23,7 @@ int main(int argc, char* argv[])
 {
     for (auto i = 1; i < argc; ++i) {
 
-        if(std::string_view(argv[i]) == "-") {
+        if (std::string_view(argv[i]) == "-") {
             RunGame(std::cin);
         } else {
             std::ifstream file(argv[i]);

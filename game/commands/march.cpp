@@ -9,8 +9,8 @@ namespace game::commands {
         std::string command;
         std::size_t id;
         std::size_t x, y;
-        if(ss >> command >> id >> x >> y) {
-            if(command == "MARCH") {
+        if (ss >> command >> id >> x >> y) {
+            if (command == "MARCH") {
                 return std::make_unique<March>(id, x, y);
             }
         }

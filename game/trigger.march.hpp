@@ -1,6 +1,8 @@
 #pragma once
 #include <map>
 #include <cmath>
+#include <vector>
+#include <system_error>
 #include "object.warrior.hpp"
 #include "engine/object.hpp"
 #include "engine/tick.event.hpp"
@@ -66,10 +68,10 @@ namespace game {
                 }
             }
         }
-        void March(engine::Map::Field to, Warrior::Ptr warrior)
+        std::error_code March(engine::Map::Field to, Warrior::Ptr warrior)
         {
-            if((to.x < map.H) && (to.y < map.W)) {
-                if(auto it = warriors.find(warrior); it != warriors.end()) {
+            if ((to.x < map.H) && (to.y < map.W)) {
+                if (auto it = warriors.find(warrior); it != warriors.end()) {
                     auto& from = it->second;
 
                     auto ticks = std::round(std::sqrt((to.x - from.x) * (to.x - from.x) + (to.y - from.y) * (to.y - from.y)));
@@ -77,19 +79,19 @@ namespace game {
 
                     OnMarchStarted.Emit({warrior, from, to});
                     warriors.erase(it);
+                    return std::error_code();
                 }
-            } else {
-                /// @todo error here
             }
+            return std::make_error_code(std::errc::invalid_argument);
         }
-        void CreateWarrior(engine::Map::Field field, Warrior::Ptr warrior)
+        std::error_code CreateWarrior(engine::Map::Field field, Warrior::Ptr warrior)
         {
-            if((field.x < map.H) && (field.y < map.W)) {
+            if ((field.x < map.H) && (field.y < map.W)) {
                 BindWarrior(field, warrior);
                 OnWarriroCreate.Emit({warrior, field});
-            } else {
-                /// @todo error here
+                return std::error_code();
             }
+            return std::make_error_code(std::errc::invalid_argument);
         }
         void BindWarrior(engine::Map::Field field, Warrior::Ptr warrior)
         {
@@ -106,12 +108,22 @@ namespace game {
         }
         Warrior::Ptr FindWarrior(std::size_t id) const noexcept
         {
-            for(const auto& [warrior, field]: warriors) {
-                if(warrior->id == id) {
+            for (const auto& [warrior, field]: warriors) {
+                if (warrior->id == id) {
                     return warrior;
                 }
             }
             return nullptr;
+        }
+        std::vector<Warrior::Ptr> GetWarriorsOnField(engine::Map::Field ifield) const
+        {
+            std::vector<Warrior::Ptr> result;
+            for (auto& [warrior, field]: warriors) {
+                if (field == ifield) {
+                    result.push_back(warrior);
+                }
+            }
+            return result;
         }
     private:
         engine::Map& map;

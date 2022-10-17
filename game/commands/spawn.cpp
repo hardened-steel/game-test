@@ -10,8 +10,8 @@ namespace game::commands {
         std::size_t id;
         std::size_t x, y;
         std::size_t damage;
-        if(ss >> command >> id >> x >> y >> damage) {
-            if(command == "SPAWN") {
+        if (ss >> command >> id >> x >> y >> damage) {
+            if (command == "SPAWN") {
                 return std::make_unique<Spawn>(id, x, y, damage);
             }
         }

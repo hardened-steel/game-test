@@ -53,7 +53,7 @@ namespace game {
         void Action(const TriggerBattle::BattleEvent& info) override
         {
             message += " BATTLE " + std::to_string(info.warrior_a->id) + " " + std::to_string(info.warrior_p->id);
-            if(info.winner) {
+            if (info.winner) {
                 message += " WINNER IS " + std::to_string(info.winner->id);
             } else {
                 message += " ALL DEAD";
@@ -62,7 +62,7 @@ namespace game {
         void Action(const engine::Tick& tick) override
         {
             if (tick == this->tick) {
-                if(!message.empty()) {
+                if (!message.empty()) {
                     stream << "[" << this->tick.count << "]" << message << std::endl;
                     message.clear();
                 }

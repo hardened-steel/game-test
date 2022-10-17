@@ -37,7 +37,7 @@ namespace game {
     public:
         void Process(const game::commands::CreateMap& command) override
         {
-            if(!engine) {
+            if (!engine) {
                 engine.emplace(std::cout, command);
 
                 OnCreateMap.Subscribe(engine->log);
@@ -53,12 +53,19 @@ namespace game {
         }
         void Process(const game::commands::Spawn& command) override
         {
-            if(engine) {
+            if (engine) {
                 engine->TickStart();
-                if(auto warrior = engine->marches.FindWarrior(command.id)) {
+                if (auto warrior = engine->marches.FindWarrior(command.id)) {
                     OnError.Emit("WARRIOR " + std::to_string((command.id)) + " ALREADY EXISTS");
                 } else {
-                    engine->marches.CreateWarrior(engine::Map::Field(command.x, command.y), std::make_shared<Warrior>(command.id, command.damage));
+                    const engine::Map::Field field(command.x, command.y);
+                    if (auto warriors = engine->marches.GetWarriorsOnField(field); warriors.empty()) {
+                        if(engine->marches.CreateWarrior(field, std::make_shared<Warrior>(command.id, command.damage))) {
+                            OnError.Emit("COORDINATES " + std::to_string((command.x)) + " " + std::to_string((command.y)) + " IS OUT OF MAP");
+                        }
+                    } else {
+                        OnError.Emit("MAP " + std::to_string((command.x)) + " " + std::to_string((command.y)) + " IS BUSY");
+                    }
                 }
                 engine->TickEnd();
             } else {
@@ -67,10 +74,12 @@ namespace game {
         }
         void Process(const game::commands::March& command) override
         {
-            if(engine) {
+            if (engine) {
                 engine->TickStart();
-                if(auto warrior = engine->marches.FindWarrior(command.id)) {
-                    engine->marches.March(engine::Map::Field(command.x, command.y), warrior);
+                if (auto warrior = engine->marches.FindWarrior(command.id)) {
+                    if(engine->marches.March(engine::Map::Field(command.x, command.y), warrior)) {
+                        OnError.Emit("COORDINATES " + std::to_string((command.x)) + " " + std::to_string((command.y)) + " IS OUT OF MAP");
+                    }
                 } else {
                     OnError.Emit("WARRIOR " + std::to_string((command.id)) + " NOT FOUND");
                 }
@@ -81,8 +90,8 @@ namespace game {
         }
         void Process(const game::commands::Wait& command) override
         {
-            if(engine) {
-                for(std::size_t i = 0; i < command.ticks; ++i) {
+            if (engine) {
+                for (std::size_t i = 0; i < command.ticks; ++i) {
                     engine->TickStart();
                     engine->TickEnd();
                 }
@@ -92,7 +101,7 @@ namespace game {
         }
         void Process(const game::commands::Finish& command) override
         {
-            if(engine) {
+            if (engine) {
                 while(engine->marches.MarchCount()) {
                     engine->TickStart();
                     engine->TickEnd();
