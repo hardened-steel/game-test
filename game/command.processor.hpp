@@ -11,7 +11,8 @@
 #include "engine/engine.hpp"
 #include "object.warrior.hpp"
 #include "trigger.march.hpp"
-#include "trigger.warrior.hpp"
+#include "trigger.battle.hpp"
+#include "trigger.return.hpp"
 #include "trigger.log.hpp"
 
 namespace game {
@@ -21,13 +22,13 @@ namespace game {
         {
         public:
             TriggerMarch marches {engine::Engine::map, engine::Engine::start};
-            TriggerWarrior warriors {marches};
+            TriggerBattle battles {marches};
 
             TriggerLog log;
         public:
             Engine(std::ostream& stream, const game::commands::CreateMap& command)
             : engine::Engine(command.H, command.W)
-            , log(stream, marches, warriors, *this)
+            , log(stream, marches, battles, *this)
             {}
         };
         engine::IEvent<game::commands::CreateMap> OnCreateMap;

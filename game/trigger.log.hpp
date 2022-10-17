@@ -1,6 +1,6 @@
 #pragma once
 #include <ostream>
-#include "trigger.warrior.hpp"
+#include "trigger.battle.hpp"
 #include "commands/create.map.hpp"
 #include "commands/finish.hpp"
 #include "engine/engine.hpp"
@@ -11,20 +11,20 @@ namespace game {
         : public engine::Trigger<0, TriggerMarch::MarchStartEvent>
         , public engine::Trigger<0, TriggerMarch::MarchFinishEvent>
         , public engine::Trigger<0, TriggerMarch::CreateWarriroEvent>
-        , public engine::Trigger<0, TriggerWarrior::BattleEvent>
+        , public engine::Trigger<0, TriggerBattle::BattleEvent>
         , public engine::Trigger<0, engine::Tick>
         , public engine::Trigger<0, game::commands::CreateMap>
         , public engine::Trigger<0, game::commands::Finish>
         , public engine::Trigger<0, std::string>
     {
     public:
-        TriggerLog(std::ostream& stream, TriggerMarch& marches, TriggerWarrior& warriors, engine::Engine& engine)
-        : stream(stream), marches(marches), warriors(warriors), engine(engine)
+        TriggerLog(std::ostream& stream, TriggerMarch& marches, TriggerBattle& battle, engine::Engine& engine)
+        : stream(stream), marches(marches), battle(battle), engine(engine)
         {
             marches.OnMarchStarted.Subscribe(*this);
             marches.OnMarchFinished.Subscribe(*this);
             marches.OnWarriroCreate.Subscribe(*this);
-            warriors.OnBattle.Subscribe(*this);
+            battle.OnBattle.Subscribe(*this);
             engine.start.Subscribe(*this);
             engine.end.Subscribe(*this);
         }
@@ -33,7 +33,7 @@ namespace game {
             marches.OnMarchStarted.UnSubscribe(*this);
             marches.OnMarchFinished.UnSubscribe(*this);
             marches.OnWarriroCreate.UnSubscribe(*this);
-            warriors.OnBattle.UnSubscribe(*this);
+            battle.OnBattle.UnSubscribe(*this);
             engine.start.UnSubscribe(*this);
             engine.end.UnSubscribe(*this);
         }
@@ -50,7 +50,7 @@ namespace game {
         {
             message += " WARRIOR SPAWNED " + std::to_string(info.warrior->id) + " ON " + std::to_string(info.field.x) + " " + std::to_string(info.field.y);
         }
-        void Action(const TriggerWarrior::BattleEvent& info) override
+        void Action(const TriggerBattle::BattleEvent& info) override
         {
             message += " BATTLE " + std::to_string(info.warrior_a->id) + " " + std::to_string(info.warrior_p->id);
             if(info.winner) {
@@ -85,7 +85,7 @@ namespace game {
     private:
         std::ostream& stream;
         TriggerMarch& marches;
-        TriggerWarrior& warriors;
+        TriggerBattle& battle;
         engine::Engine& engine;
 
         engine::Tick tick;

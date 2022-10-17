@@ -5,7 +5,7 @@
 
 namespace game {
 
-    class TriggerWarrior
+    class TriggerBattle
         : public engine::Trigger<2, TriggerMarch::CreateWarriroEvent>
         , public engine::Trigger<2, TriggerMarch::MarchStartEvent>
         , public engine::Trigger<2, TriggerMarch::MarchFinishEvent>
@@ -20,14 +20,14 @@ namespace game {
     public:
         engine::IEvent<BattleEvent> OnBattle;
     public:
-        explicit TriggerWarrior(TriggerMarch& march)
+        explicit TriggerBattle(TriggerMarch& march)
         : march(march)
         {
             march.OnMarchStarted.Subscribe(*this);
             march.OnMarchFinished.Subscribe(*this);
             march.OnWarriroCreate.Subscribe(*this);
         }
-        ~TriggerWarrior() noexcept
+        ~TriggerBattle() noexcept
         {
             march.OnMarchStarted.UnSubscribe(*this);
             march.OnMarchFinished.UnSubscribe(*this);
